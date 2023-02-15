@@ -11,7 +11,6 @@ let rec removeOddIdx = function
   | x1::_ -> [x1]
   | _ -> []
 
-
 // Exercise 2.3
 let rec combinePair = function
   | x1::x2::xs -> (x1, x2)::combinePair(xs)
@@ -27,7 +26,7 @@ let mkComplex x y = {a = x; b = y}
 
 let complexToPair c = (c.a, c.b)
 
-let ( |+| ) (c1: complex) (c2: complex) = mkComplex (c1.a + c2.a) (c1.b + c2.b)
+let ( |+|) (c1: complex) (c2: complex) = mkComplex (c1.a + c2.a) (c1.b + c2.b)
 
 let ( |*| ) (c1: complex) (c2: complex) = mkComplex (c1.a*c2.a - c1.b*c2.b) (c1.b*c2.a + c1.a*c2.b)
 
@@ -51,7 +50,7 @@ let implodeRev (cs: char list) = List.fold (fun s c -> c.ToString() + s) "" cs
 // Exercise 2.7
 let toUpper s = s |> explode1 |> List.map (fun c -> System.Char.ToUpper c) |> implode
 
-let toUpperComposition = explode1 >> List.map (fun c -> System.Char.ToUpper c) >> implode
+let toUpper2 = explode1 >> List.map System.Char.ToUpper >> implode
 
 // Exercise 2.8
 let rec ack = function
@@ -75,7 +74,7 @@ let rec downto3 f n = function
   | e when n > 0 -> downto3 f (n-1) (f n e)
   | e -> e
 
-let fac n = downto3 (fun n -> fun e -> n * e) n 1
+let fac n = downto3 (fun n e -> n * e) n 1
 
 let range (g: int -> 'a) = function
   | (n: int) -> downto3 (fun x -> fun xs -> g(x)::xs) n []
@@ -109,7 +108,6 @@ let oddConsonants (w: word) _ (acc: int) =
   match w with
     | w when (w |> List.filter (fun (x, _) -> isConsonant x)).Length % 2 = 1 -> -acc
     | _ -> acc
-
 // using if-else-then
 let oddConsonants1 (w: word) (pos: int) (acc: int) =
   if ((w |> List.filter (fun (x, _) -> isConsonant x)).Length % 2 = 1) then -acc else acc
@@ -124,5 +122,11 @@ let TLS : square = [(0, tripleLetterScore)];;
 let DWS : square = SLS @ [(1, doubleWordScore)];;
 let TWS : square = SLS @ [(1, tripleWordScore)];;
 
-// let calculatePoints (squares: square list) (w: word) =
-//   squares |> List.mapi (fun (x, f) -> (x, f))
+let calculatePoints (squares: square list) (w: word) =
+  squares |>
+  List.mapi (fun (i: int) (s: square) ->
+  List.map (fun (y:int, s: square) -> (([x, (f w 0)])) |>
+  List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) [] |>
+  List.sortBy (fun (x, _) -> x) |>
+  List.map (fun (x, y) -> y) |>
+  List.fold (fun xs x -> x >> xs) (fun x -> x) <| 0
