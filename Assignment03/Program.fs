@@ -109,3 +109,10 @@ let rec boolEval b (w: word) s =
     | IsDigit c -> charEval c w s |> System.Char.IsDigit
     | IsLetter c -> charEval c w s |> System.Char.IsLetter
     | IsVowel c -> charEval c w s |> isVowel
+
+// Assignment 3.6
+let isConsonant = IsVowel >> (~~)
+let isConsonant2 c = Not (IsVowel c)
+let isConsonant3 c = IsVowel c |> (~~)
+
+// Assignment 3.7
