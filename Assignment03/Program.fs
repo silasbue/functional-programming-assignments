@@ -111,9 +111,9 @@ let rec boolEval b (w: word) s =
     | IsVowel c -> charEval c w s |> isVowel
 
 // Assignment 3.6
-let isConsonant = IsVowel >> (~~)
+let isConsonant c = ~~(IsVowel c)
 let isConsonant2 c = Not (IsVowel c)
-let isConsonant3 c = IsVowel c |> (~~)
+let isConsonant3 = IsVowel >> (~~)
 
 // Assignment 3.7
 type stmnt =
@@ -168,3 +168,31 @@ let oddConsonants =
                              Ass ("_result_", V "_result_" .*. N -1),
                              Ass ("i", V "i" .+. N 1)),
                          Ass ("i", V "i" .+. N 1)))))
+
+// Assignment 3.10
+type square = (int * squareFun) list
+type square2 = (int * stmnt) list
+
+let SLS = [(0, Ass ("_result_", arithSingleLetterScore))]
+let DLS = [(0, Ass ("_result_", arithDoubleLetterScore))]
+let TLS = [(0, Ass ("_result_", arithTripleLetterScore))]
+let DWS = [(1, Ass ("_result_", arithDoubleWordScore))] @ SLS
+let TWS = [(1, Ass ("_result_", arithTripleWordScore))] @ SLS
+
+let calculatePoints (squares: square list) (w: word) =
+    squares
+    |> List.mapi (fun i s -> (i, s))
+    |> List.map (fun (i, s) ->
+          match s with
+          | (a, b)::(x, f)::xs -> [(a, b w i); (x, f w i)]
+          | (x, f)::xs -> [(x, f w i)])
+    |> List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) []
+    |> List.sortBy fst
+    |> List.map snd
+    |> List.fold (fun x xs -> x >> xs) id
+    <| 0
+
+let calculatePoints2 (squares: square2 list) =
+    squares
+    |> List.fold (fun xs s -> xs @ [(List.map (fun (x, stm) -> (x, stmntToSquareFun stm)) s)]) []
+    |> calculatePoints

@@ -122,11 +122,16 @@ let TLS : square = [(0, tripleLetterScore)];;
 let DWS : square = SLS @ [(1, doubleWordScore)];;
 let TWS : square = SLS @ [(1, tripleWordScore)];;
 
+// UPDATED - find the one i handed in on codejudge
 let calculatePoints (squares: square list) (w: word) =
-  squares |>
-  List.mapi (fun (i: int) (s: square) ->
-  List.map (fun (y:int, s: square) -> (([x, (f w 0)])) |>
-  List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) [] |>
-  List.sortBy (fun (x, _) -> x) |>
-  List.map (fun (x, y) -> y) |>
-  List.fold (fun xs x -> x >> xs) (fun x -> x) <| 0
+    squares
+    |> List.mapi (fun i s -> (i, s))
+    |> List.map (fun (i, s) ->
+          match s with
+          | (a, b)::(x, f)::xs -> [(a, b w i); (x, f w i)]
+          | (x, f)::xs -> [(x, f w i)])
+    |> List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) []
+    |> List.sortBy fst
+    |> List.map snd
+    |> List.fold (fun x xs -> x >> xs) id
+    <| 0
