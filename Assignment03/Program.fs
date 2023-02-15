@@ -116,3 +116,23 @@ let isConsonant2 c = Not (IsVowel c)
 let isConsonant3 c = IsVowel c |> (~~)
 
 // Assignment 3.7
+type stmnt =
+| Skip                        (* does nothing *)
+| Ass of string * aExp        (* variable assignment *)
+| Seq of stmnt * stmnt        (* sequential composition *)
+| ITE of bExp * stmnt * stmnt (* if-then-else statement *)
+| While of bExp * stmnt       (* while statement *)
+
+let rec evalStmnt stm w s =
+    match stm with
+    | Skip -> s
+    | Ass (x, a) -> s |> Map.add x (arithEval a w s)
+    | Seq (stm1, stm2) -> evalStmnt stm1 w s |> evalStmnt stm2 w
+    | ITE (guard, stm1, stm2) ->
+        if boolEval guard w s
+        then evalStmnt stm1 w s
+        else evalStmnt stm2 w s
+    | While (guard, stm) ->
+        if boolEval guard w s
+        then evalStmnt stm w s |> evalStmnt (While (guard, stm)) w
+        else s
