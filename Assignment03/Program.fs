@@ -129,10 +129,34 @@ let rec evalStmnt stm w s =
     | Ass (x, a) -> s |> Map.add x (arithEval a w s)
     | Seq (stm1, stm2) -> evalStmnt stm1 w s |> evalStmnt stm2 w
     | ITE (guard, stm1, stm2) ->
-        if boolEval guard w s
-        then evalStmnt stm1 w s
-        else evalStmnt stm2 w s
+        match boolEval guard w s with
+        | true  -> evalStmnt stm1 w s
+        | false -> evalStmnt stm2 w s
     | While (guard, stm) ->
-        if boolEval guard w s
-        then evalStmnt stm w s |> evalStmnt (While (guard, stm)) w
-        else s
+        match boolEval guard w s with
+        | true  -> evalStmnt stm w s |> evalStmnt (While (guard, stm)) w
+        | false -> s
+
+// Assignment 3.8
+type squareFun = word -> int -> int -> int
+
+let stmntToSquareFun (stm: stmnt): squareFun =
+    (fun (w: word) pos acc
+      -> evalStmnt stm w (Map.ofList [("_pos_", pos); ("_acc_", acc)])
+         |> Map.find "_result_")
+
+let singleLetterScore = stmntToSquareFun (Ass ("_result_", arithSingleLetterScore))
+let doubleLetterScore = stmntToSquareFun (Ass ("_result_", arithDoubleLetterScore))
+let tripleLetterScore = stmntToSquareFun (Ass ("_result_", arithTripleLetterScore))
+let doubleWordScore = stmntToSquareFun (Ass ("_result_", arithDoubleWordScore))
+let tripleWordScore = stmntToSquareFun (Ass ("_result_", arithTripleWordScore))
+let containsNumbers =
+  stmntToSquareFun
+    (Seq (Ass ("_result_", V "_acc_"),
+          While (V "i" .<. WL,
+                 ITE (IsDigit (CV (V "i")),
+                      Seq (
+                           Ass ("_result_", V "_result_" .*. N -1),
+                           Ass ("i", WL)),
+                      Ass ("i", V "i" .+. N 1)))))
+
