@@ -160,3 +160,11 @@ let containsNumbers =
                            Ass ("i", WL)),
                       Ass ("i", V "i" .+. N 1)))))
 
+let oddConsonants =
+        (Seq (Ass ("_result_", V "_acc_"),
+             While (V "i" .<. WL,
+                    ITE (Not (IsVowel (CV (V "i"))),
+                         Seq (
+                             Ass ("_result_", V "_result_" .*. N -1),
+                             Ass ("i", V "i" .+. N 1)),
+                         Ass ("i", V "i" .+. N 1)))))
