@@ -93,6 +93,7 @@ let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to 
 let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)
 
 let isVowel =
+    System.Char.ToLower >> 
     function
     | 'a' | 'e' | 'i' | 'o' | 'u' | 'æ' | 'ø' | 'å' -> true
     | _ -> false
