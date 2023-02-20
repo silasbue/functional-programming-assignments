@@ -96,14 +96,14 @@ let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)
 let isVowel =
     System.Char.ToLower >>
     function
-    | 'a' | 'e' | 'i' | 'o' | 'u' | 'y'| 'æ' | 'ø' | 'å' -> true
+    | 'a' | 'e' | 'i' | 'o' | 'u' | 'y' -> true
     | _ -> false
 
 // for 3.10 (y is a consonant)
 let isConsonantY =
     System.Char.ToLower >>
     function
-    | 'a' | 'e' | 'i' | 'o' | 'u' | 'æ' | 'ø' | 'å' -> false
+    | 'a' | 'e' | 'i' | 'o' | 'u' -> false
     | _ -> true
 
 let rec boolEval b (w: word) s =
