@@ -7,7 +7,7 @@ type aExp =
 | Add of aExp * aExp  // Addition
 | Sub of aExp * aExp  // Subtraction
 | Mul of aExp * aExp  // Multiplication
-  
+
 let (.+.) a b = Add (a, b)
 let (.-.) a b = Sub (a, b)
 let (.*.) a b = Mul (a, b)
@@ -57,7 +57,7 @@ let rec arithEval a (w: word) s =
 
 // Assignment 3.4
 type cExp =
-| C  of char      (* Character value *)
+| C of char       (* Character value *)
 | ToUpper of cExp (* Converts lower case to upper case character, non-letters are unchanged *)
 | ToLower of cExp (* Converts upper case to lower case character, non-letters are unchanged *)
 | CV of aExp      (* Character lookup at word index *)
@@ -68,7 +68,7 @@ let rec charEval c (w: word) s =
     | ToLower c -> charEval c w s |> System.Char.ToLower
     | ToUpper c -> charEval c w s |> System.Char.ToUpper
     | CV n -> fst w.[arithEval n w s]
-    
+
 // Assignment 3.5
 type bExp =
 | TT                    (* true *)
@@ -80,6 +80,7 @@ type bExp =
 | IsDigit of cExp       (* check for digit *)
 | IsLetter of cExp      (* check for letter *)
 | IsVowel of cExp       (* check for vowel *)
+| IsConsonantY of cExp
 
 let (~~) b = Not b
 let (.&&.) b1 b2 = Conj (b1, b2)
@@ -93,10 +94,17 @@ let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to 
 let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)
 
 let isVowel =
-    System.Char.ToLower >> 
+    System.Char.ToLower >>
     function
-    | 'a' | 'e' | 'i' | 'o' | 'u' | 'æ' | 'ø' | 'å' -> true
+    | 'a' | 'e' | 'i' | 'o' | 'u' | 'y'| 'æ' | 'ø' | 'å' -> true
     | _ -> false
+
+// for 3.10 (y is a consonant)
+let isConsonantY =
+    System.Char.ToLower >>
+    function
+    | 'a' | 'e' | 'i' | 'o' | 'u' | 'æ' | 'ø' | 'å' -> false
+    | _ -> true
 
 let rec boolEval b (w: word) s =
     match b with
@@ -109,6 +117,7 @@ let rec boolEval b (w: word) s =
     | IsDigit c -> charEval c w s |> System.Char.IsDigit
     | IsLetter c -> charEval c w s |> System.Char.IsLetter
     | IsVowel c -> charEval c w s |> isVowel
+    | IsConsonantY c -> charEval c w s |> isConsonantY
 
 // Assignment 3.6
 let isConsonant c = ~~(IsVowel c)
@@ -163,7 +172,7 @@ let containsNumbers =
 let oddConsonants =
         (Seq (Ass ("_result_", V "_acc_"),
              While (V "i" .<. WL,
-                    ITE (Not (IsVowel (CV (V "i"))),
+                    ITE (IsConsonantY (CV (V "i")),
                          Seq (
                              Ass ("_result_", V "_result_" .*. N -1),
                              Ass ("i", V "i" .+. N 1)),
@@ -184,9 +193,10 @@ let calculatePoints (squares: square list) (w: word) =
     |> List.mapi (fun i s -> (i, s))
     |> List.map (fun (i, s) ->
           match s with
-          | (a, b)::(x, f)::xs -> [(a, b w i); (x, f w i)]
-          | (x, f)::xs -> [(x, f w i)])
-    |> List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) []
+          | (a, b)::(x, f)::_ -> [(a, b w i); (x, f w i)]
+          | (x, f)::_ -> [(x, f w i)]
+          | _ -> failwith "todo")
+    |> List.fold (fun xs x -> x @ xs) []
     |> List.sortBy fst
     |> List.map snd
     |> List.fold (fun x xs -> x >> xs) id

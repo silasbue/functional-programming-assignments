@@ -130,7 +130,7 @@ let calculatePoints (squares: square list) (w: word) =
           match s with
           | (a, b)::(x, f)::xs -> [(a, b w i); (x, f w i)]
           | (x, f)::xs -> [(x, f w i)])
-    |> List.fold (fun xs1 x1 -> x1 |> List.fold (fun xs2 x2 -> x2::xs2) xs1) []
+    |> List.fold (fun xs x -> x @ xs) []
     |> List.sortBy fst
     |> List.map snd
     |> List.fold (fun x xs -> x >> xs) id
