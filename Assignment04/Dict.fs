@@ -14,10 +14,21 @@ let empty () = Leaf false
 let rec insert (s: string) (d: Dictionary)=
     match d with
     | Leaf _ when s = "" -> Leaf true
-    | Leaf b when b = false -> Node (false, Map.empty |> Map.add (s.Chars(0)) (insert (s.Substring(1, s.Length-1)) (empty ())))
-    | Node (b, m) when m.ContainsKey(s.Chars(0)) -> Node (b, m.Add (s.Chars(0), insert (s.Substring(1, s.Length-1)) (Map.find (s.Chars(0)) (m))))
-    | Node (b, m) -> Node (b, m.Add (s.Chars(0), insert (s.Substring(1, s.Length-1)) (empty ())))
+    | Node (_, m) when s = "" -> Node (true, m)
+    | Leaf b -> Node (b, Map.empty |> Map.add (s.Chars(0)) (insert (s.Substring(1, s.Length-1)) (empty ())))
+    | Node (b, m) -> Node (b, m.Add (s.Chars(0), insert (s.Substring(1, s.Length-1)) ((m.TryFind (s.Chars(0))) |??| (empty ()))))
     
-    
-    // | Node (b, m) when b = false -> Node (b, m.Add ((s.Chars(0)), (insert (s.Substring(1, s.Length-1)) (Node (b, Map.empty)))))
-    // | _ -> failwith "todo"
+let rec lookup (s: string) (d: Dictionary) =
+    match d with
+    | Leaf b when s.Length = 0 -> b
+    | Leaf _ -> false
+    | Node (b, _) when s.Length = 0 -> b
+    | Node (_, m) -> lookup (s.Substring(1, s.Length-1)) ((m.TryFind (s.Chars(0))) |??| empty ())
+
+let step (c: char) (d: Dictionary): (bool * Dictionary) option =
+    match d with
+    | Leaf _ -> None
+    | Node (_, m) -> match m.TryFind c with
+                     | Some (Node (b, m1)) -> Some (b, Node (b, m1))
+                     | Some (Leaf b) -> Some (b, Leaf b)
+                     | None -> None
