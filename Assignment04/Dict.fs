@@ -11,13 +11,13 @@ let (|??|) a b =
 
 let empty () = Leaf false
 
-let rec insert (s: string) (d: Dictionary)=
+let rec insert (s: string) (d: Dictionary) =
     match d with
     | Leaf _ when s = "" -> Leaf true
     | Node (_, m) when s = "" -> Node (true, m)
     | Leaf b -> Node (b, Map.empty |> Map.add (s.Chars(0)) (insert (s.Substring(1, s.Length-1)) (empty ())))
     | Node (b, m) -> Node (b, m.Add (s.Chars(0), insert (s.Substring(1, s.Length-1)) ((m.TryFind (s.Chars(0))) |??| (empty ()))))
-    
+
 let rec lookup (s: string) (d: Dictionary) =
     match d with
     | Leaf b when s.Length = 0 -> b

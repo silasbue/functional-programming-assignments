@@ -56,4 +56,4 @@ let subtract s1 s2 =
     |> fold (fun acc k v -> remove k v acc) s1
     
 let intersection s1 s2 =
-    subtract s1 s2 |> subtract s1
+    subtract s1 s2 |> subtract s1 
