@@ -36,6 +36,7 @@ let factC x =
         | 0 -> c 1
         | x -> aux (x-1) (fun r -> c (x * r))
     aux x id
+    
 //todo:
 // factA is faster than factC because because everything in factA can be evaluated before the recursive call happens.
 // This means that we don't have to store much in the memory. In factC the continuation will have to be stored until
@@ -57,7 +58,7 @@ let fibA x =
     let rec aux i acc1 acc2 =
         match i with
         | i when i = x -> acc1
-        | x -> aux (i+1) acc2 (acc1 + acc2)
+        | _ -> aux (i+1) acc2 (acc1 + acc2)
     aux 0 0 1
     
 let fibA2 x =
@@ -68,11 +69,11 @@ let fibA2 x =
     aux x 0 1
 
 let fibC x: int =
-    let rec aux x c =
+    let rec aux x (c: int -> 'a) =
         match x with
-        | 0 -> c 0 1
-        | x -> aux (x-1) (fun acc1 acc2 -> c acc2 (acc1 + acc2))
-    aux x (fun a _ -> a)
+        | 0 -> c 0
+        | x -> aux (x-1) (fun acc1 -> c (acc1 + x))
+    aux x id
     
 // Exercise 5.6
 let rec bigListK c =
@@ -106,13 +107,46 @@ and cExp =
     | ToLower of cExp
     | IntToChar of aExp
 
-let rec arithEval a (w: word) s =
+let rec arithEvalSimple a (w: word) s =
     match a with
     | N n -> n
     | V v -> (Map.tryFind v s) |??| 0
     | WL -> w.Length
-    | PV p -> snd w.[arithEval p w s]
-    | Add (x, y) -> arithEval x w s + arithEval y w s
-    | Sub (x, y) -> arithEval x w s - arithEval y w s
-    | Mul (x, y) -> arithEval x w s * arithEval y w s
-    | CharToInt c -> arithEval (N (int c)) w s
+    | PV p -> snd w.[arithEvalSimple p w s]
+    | Add (x, y) -> arithEvalSimple x w s + arithEvalSimple y w s
+    | Sub (x, y) -> arithEvalSimple x w s - arithEvalSimple y w s
+    | Mul (x, y) -> arithEvalSimple x w s * arithEvalSimple y w s
+    | CharToInt c -> int (charEvalSimple c w s)
+    | _ -> failwith "todo"
+    
+and charEvalSimple c (w: word) s =
+    match c with
+    | C c -> c
+    | ToLower c -> charEvalSimple c w s |> System.Char.ToLower
+    | ToUpper c -> charEvalSimple c w s |> System.Char.ToUpper
+    | CV n -> fst w.[arithEvalSimple n w s]
+    | IntToChar n -> char (arithEvalSimple n w s)
+    | _ -> failwith "todo"
+    
+// let rec arithEvalTail a (w: word) s (con: char -> 'a) =
+//     match a with
+//     | N n -> n
+//     | V v -> (Map.tryFind v s) |??| 0
+//     | WL -> w.Length
+//     | PV p -> snd w.[arithEvalTail p w s con]
+//     | Add (x, y) -> arithEvalTail x w s con + arithEvalTail y w s con
+//     | Sub (x, y) -> arithEvalTail x w s con - arithEvalTail y w s con
+//     | Mul (x, y) -> arithEvalTail x w s con * arithEvalTail y w s con
+//     | CharToInt c -> con (charEvalTail c w s (fun r -> int r))
+//     | _ -> failwith "todo"
+//     
+// and charEvalTail c (w: word) s (con2: int -> 'b): char =
+//     match c with
+//     | C c -> c
+//     | IntToChar n -> con2 (arithEvalTail n w s (fun r -> con2 r))
+//     | _ -> failwith "todo"
+//
+//
+//
+// let arithEval a w s = arithEvalTail a w s id
+// let charEval c w s  = charEvalTail c w s id

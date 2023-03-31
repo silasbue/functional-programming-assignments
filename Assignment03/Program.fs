@@ -1,4 +1,4 @@
-﻿// Assignments 3.1
+﻿ // Assignments 3.1
 type aExp =
 | N of int            // Integer value
 | V of string         // Variable
